@@ -1,0 +1,21 @@
+{
+  "name": "herox-ai-bot",
+  "version": "2.0.0",
+  "description": "HeroX — AI Developer Agent Discord Bot",
+  "main": "discordbot.js",
+  "scripts": {
+    "start": "node discordbot.js",
+    "deploy": "node src/deploy-commands.js",
+    "dev": "node --watch discordbot.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.9",
+    "@google/generative-ai": "^0.15.0",
+    "chalk": "^4.1.2",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^2.7.0",
+    "openai": "^4.47.1"
+  },
+  "engines": { "node": ">=18.0.0" }
+}
