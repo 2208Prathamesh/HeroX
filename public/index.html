@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeroX AI | Developer Agent</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --surface-1: rgba(20, 20, 22, 0.6);
+            --surface-2: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --accent: #ec4899;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Mesh Background */
+        .bg-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -2;
+            background-image:
+                radial-gradient(circle at 15% 30%, rgba(99, 102, 241, 0.15), transparent 30%),
+                radial-gradient(circle at 85% 60%, rgba(236, 72, 153, 0.15), transparent 30%);
+            animation: breathe 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes breathe {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 2rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 8rem 5% 4rem;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            text-align: left;
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 5rem;
+        }
+
+        .hero-content {
+            flex: 1;
+        }
+
+        .hero-content .actions {
+            justify-content: flex-start;
+        }
+
+        .hero-visuals {
+            flex: 0.8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .bot-avatar {
+            width: 140px;
+            height: 140px;
+            margin-bottom: 2.5rem;
+            border-radius: 50%;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .bot-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.6);
+            position: relative;
+            z-index: 2;
+        }
+
+        .bot-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -15px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            filter: blur(25px);
+            opacity: 0.6;
+            z-index: 1;
+            animation: pulse-glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                opacity: 0.4;
+                transform: scale(0.95);
+            }
+
+            100% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            line-height: 1.6;
+        }
+
+        /* Uptime Tracker inside Hero */
+        .uptime-container {
+            background: var(--surface-1);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem 3rem;
+            margin-bottom: 3rem;
+            display: inline-flex;
+            gap: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .time-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .time-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .time-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: white;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background: var(--surface-2);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+
+        svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--surface-1);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            transition: transform 0.3s, border-color 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Founder Section */
+        .founder-section {
+            padding: 4rem 5% 8rem;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .founder-card {
+            background: linear-gradient(135deg, rgba(30, 30, 40, 0.6), rgba(15, 15, 20, 0.8));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            padding: 3.5rem 2rem;
+            max-width: 650px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .founder-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .founder-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent 0%, rgba(99, 102, 241, 0.1) 25%, transparent 50%, rgba(236, 72, 153, 0.1) 75%, transparent 100%);
+            animation: spinBg 10s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes spinBg {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .founder-avatar {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            border-radius: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            color: white;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+            font-weight: 900;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .founder-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .founder-role {
+            color: var(--accent);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .founder-name {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #fff, #fca5a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .founder-bio {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            .uptime-container {
+                padding: 1.5rem;
+                gap: 1rem;
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-mesh"></div>
+
+    <nav>
+        <div class="nav-logo">
+            <img src="https://www.dropbox.com/scl/fi/kjddrv36uqa5p0npjtfyc/herox_logo.jpg?rlkey=s946rcevm794ixedv7hufkeq2&st=kms7dtdc&raw=1"
+                alt="Logo">
+            HeroX AI
+        </div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#features">Features</a>
+            <a href="#" id="nav-discord" target="_blank">Discord</a>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="status-pill">
+                <div class="dot"></div> SYSTEMS OPERATIONAL
+            </div>
+
+            <h1>Code Smarter.<br>Build Faster.</h1>
+            <p class="subtitle">HeroX is the ultimate Open Source Community AI Developer Agent natively built for
+                Discord.
+                Manage API keys securely, generate complex codebases, and iterate on projects directly in your server.
+            </p>
+
+            <div style="margin-bottom: 2.5rem;">
+                <div style="color: var(--primary); font-weight: 800; letter-spacing: 3px; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 1rem; text-shadow: 0 0 10px rgba(99,102,241,0.4);">
+                    <div class="dot" style="display:inline-block; width:10px; height:10px; margin-right:8px; animation:blink 1.5s infinite; box-shadow:0 0 10px #10b981; background:#10b981;"></div>
+                    Running For
+                </div>
+                <div class="uptime-container" style="margin-bottom:0; box-shadow: 0 15px 30px rgba(0,0,0,0.3); border: 1px solid rgba(99, 102, 241, 0.3); padding: 1.2rem 2rem;">
+                    <div class="time-box">
+                        <span class="time-val" id="days" style="font-size: 1.8rem;">00</span>
+                        <span class="time-label">Days</span>
+                    </div>
+                    <div class="time-box">
+                        <span class="time-val" id="hours" style="font-size: 1.8rem;">00</span>
+                        <span class="time-label">Hours</span>
+                    </div>
+                    <div class="time-box">
+                        <span class="time-val" id="mins" style="font-size: 1.8rem;">00</span>
+                        <span class="time-label">Mins</span>
+                    </div>
+                    <div class="time-box">
+                        <span class="time-val" id="secs" style="font-size: 1.8rem;">00</span>
+                        <span class="time-label">Secs</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions" style="justify-content: flex-start;">
+                <a href="#" id="btn-discord" target="_blank" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+                    </svg>
+                    Join Server
+                </a>
+                <a href="#" id="btn-github" target="_blank" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                    </svg>
+                    Source Code
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-visuals">
+            <div class="founder-card" style="margin: 0; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); border-radius: 24px; padding: 2.5rem 2rem; max-width: 450px;">
+                <div class="founder-avatar" style="width: 120px; height: 120px; padding: 0; margin: 0 auto 1.5rem;">
+                    <img src="https://media.tenor.com/2Xy-F-N48GMAAAAi/cyberpunk.gif"
+                        style="width:100%;height:100%;object-fit:cover;border-radius:30%;" alt="Founder Prathamesh">
+                </div>
+                <div class="founder-content">
+                    <div class="founder-role">Founder & Lead Developer</div>
+                    <h2 class="founder-name" style="font-size: 2.2rem; margin-bottom: 0.5rem;">Prathamesh Barbole</h2>
+                    <p class="founder-bio" style="font-size: 0.95rem;">B.Tech Student at DYPCOE, Pune & the visionary behind HeroX AI. Building the
+                        future of autonomous, multi-model developer agents right inside Discord. Open source by design,
+                        community-driven by nature.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2 class="section-title">Why use HeroX?</h2>
+        <div class="grid">
+            <div class="card">
+                <div class="card-icon">🧠</div>
+                <h3>Multi-Model Intelligence</h3>
+                <p>Support for OpenAI, Anthropic Claude, Gemini, and OpenRouter architectures. Automatically route
+                    requests to the best available model.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔒</div>
+                <h3>Vault Security</h3>
+                <p>Industry-standard AES-256-GCM encryption ensures your personal API keys are strictly local and fully
+                    secure inside the database.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">⚡</div>
+                <h3>Continuous Uptime</h3>
+                <p>Designed for reliability with built-in PM2 and Render hosting support. Monitored through this active
+                    real-time dashboard.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🎨</div>
+                <h3>Multimodal Design</h3>
+                <p>Not just text. HeroX bridges logic and creativity with built-in DALL-E image generation and RunwayML
+                    video orchestration.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">💬</div>
+                <h3>Contextual Threads</h3>
+                <p>Deeply integrated into Discord threads. HeroX remembers conversation context and isolates active
+                    development sessions securely.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🛠️</div>
+                <h3>Agentic Code Exec</h3>
+                <p>Fully equipped to analyze complex codebases, output formatted files, and iterate autonomously on
+                    massive architecture goals.</p>
+            </div>
+        </div>
+    </section>
+
+ 
+
+    <footer>
+        <p>© 2025 HeroX Community. Built with Discord.js.</p>
+    </footer>
+
+    <script>
+        // Live Uptime Tracker & Config Loader
+        let startTime = Date.now();
+
+        async function fetchAPI() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+
+                // Set Uptime
+                startTime = Date.now() - (data.uptime * 1000);
+
+                // Dynamically populate Links from Server ENV
+                document.getElementById('btn-discord').href = data.discordLink;
+                document.getElementById('nav-discord').href = data.discordLink;
+                document.getElementById('btn-github').href = data.githubLink;
+
+            } catch (e) {
+                console.error("Failed to sync API data.");
+            }
+        }
+
+        function updateTimer() {
+            const diff = Math.floor((Date.now() - startTime) / 1000);
+            if (diff < 0) return;
+
+            const d = Math.floor(diff / 86400);
+            const h = Math.floor((diff % 86400) / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            const s = diff % 60;
+
+            document.getElementById('days').textContent = d.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = h.toString().padStart(2, '0');
+            document.getElementById('mins').textContent = m.toString().padStart(2, '0');
+            document.getElementById('secs').textContent = s.toString().padStart(2, '0');
+        }
+
+        fetchAPI();
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
+</body>
+
+</html>

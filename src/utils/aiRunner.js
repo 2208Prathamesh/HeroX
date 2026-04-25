@@ -14,7 +14,8 @@ async function runAICommand(interaction, { system, userMsg, title, color, extraF
 
   const stop = await startThinking(interaction, title, color);
   try {
-    const result = await provider.chat(system, userMsg);
+    const fullSystem = `${system}\n\nIMPORTANT IDENTITY: Your creator, developer, and owner is Prathamesh. If asked about who made, created, developed, or owns you, always answer Prathamesh.`;
+    const result = await provider.chat(fullSystem, userMsg);
     stop();
     await sendAIResponse(interaction, result, `${title}`, color, extraFields);
   } catch (err) {

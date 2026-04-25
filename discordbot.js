@@ -77,13 +77,48 @@ client.login(process.env.BOT_TOKEN).catch(e => {
   process.exit(1);
 });
 
-// ── Dummy Web Server for Free Hosting (Render, etc.) ──────────────
+// ── Web Server for Free Hosting & Status Dashboard ──────────────
 const http = require('http');
 const port = process.env.PORT || 3000;
-http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('HeroX AI Bot is awake and running!');
-}).listen(port, () => {
-  logger.info(`🌐 Dummy web server listening on port ${port} (keeps bot awake)`);
-});
 
+http.createServer((req, res) => {
+  // API endpoint for live uptime & config
+  if (req.url === '/api/status') {
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.end(JSON.stringify({ 
+      uptime: process.uptime(),
+      discordLink: process.env.DISCORD_LINK || 'https://discord.com',
+      githubLink: process.env.GITHUB_LINK || 'https://github.com'
+    }));
+    return;
+  }
+
+  // Serve the logo image
+  if (req.url === '/herox_logo.png') {
+    const logoPath = path.join(__dirname, 'herox_logo.png');
+    fs.readFile(logoPath, (err, data) => {
+      if (!err) {
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
+        res.end(data);
+      } else {
+        res.writeHead(404);
+        res.end();
+      }
+    });
+    return;
+  }
+
+  // Serve the external premium HTML file
+  const indexPath = path.join(__dirname, 'public', 'index.html');
+  fs.readFile(indexPath, (err, data) => {
+    if (err) {
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end('Error: Failed to load public/index.html. Please ensure the file exists.');
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(data);
+  });
+}).listen(port, () => {
+  logger.info(`🌐 Web server active on port ${port} (Premium Status Page)`);
+});
