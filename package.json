@@ -1,5 +1,5 @@
 {
-  "name": "herox-ai-bot",
+  "name": "herox-ai-discordbot",
   "version": "2.0.0",
   "description": "HeroX — AI Developer Agent Discord Bot",
   "main": "discordbot.js",
